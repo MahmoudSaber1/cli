@@ -1,0 +1,95 @@
+name: PR Slack notify
+
+# pull_request_target so PRs from forks can still read the webhook secret.
+# Safe here: the job never checks out or runs PR code, and every PR field is
+# passed through env (never interpolated into the script).
+on:
+  pull_request_target:
+    types: [opened, reopened, ready_for_review]
+
+permissions: {}
+
+jobs:
+  notify:
+    name: Notify Slack
+    # Drafts are skipped on open and announced once they become ready for review.
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Post PR to Slack
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_PR_WEBHOOK_URL }}
+          # Slack member ID of the reviewer to mention on every PR.
+          SLACK_OWNER_ID: ${{ vars.SLACK_OWNER_ID }}
+          # JSON map of GitHub login -> Slack member ID, e.g. {"ashrafmo-1":"U0BCTHY9R1R"}.
+          SLACK_USER_MAP: ${{ vars.SLACK_USER_MAP }}
+          REPO: ${{ github.repository }}
+          ACTION: ${{ github.event.action }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          PR_BASE: ${{ github.event.pull_request.base.ref }}
+          PR_HEAD: ${{ github.event.pull_request.head.label }}
+          PR_ADDITIONS: ${{ github.event.pull_request.additions }}
+          PR_DELETIONS: ${{ github.event.pull_request.deletions }}
+          PR_FILES: ${{ github.event.pull_request.changed_files }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "$SLACK_WEBHOOK_URL" ]; then
+            echo "::warning::SLACK_PR_WEBHOOK_URL secret is not set; skipping Slack notification."
+            exit 0
+          fi
+
+          user_map="${SLACK_USER_MAP:-}"
+          [ -n "$user_map" ] || user_map='{}'
+          author_id=$(jq -r --arg u "$PR_AUTHOR" '.[$u] // empty' <<<"$user_map")
+          if [ -n "$author_id" ]; then
+            author="<@$author_id>"
+          else
+            author="*$PR_AUTHOR* (GitHub)"
+          fi
+
+          # Mention the owner too, unless they opened the PR themselves.
+          mentions="$author"
+          if [ -n "${SLACK_OWNER_ID:-}" ] && [ "$SLACK_OWNER_ID" != "$author_id" ]; then
+            mentions="<@$SLACK_OWNER_ID> $author"
+          fi
+
+          case "$ACTION" in
+            reopened) verb="reopened" ;;
+            ready_for_review) verb="marked ready for review" ;;
+            *) verb="opened" ;;
+          esac
+
+          payload=$(jq -n \
+            --arg repo "$REPO" --arg verb "$verb" --arg mentions "$mentions" \
+            --arg number "$PR_NUMBER" --arg title "$PR_TITLE" --arg url "$PR_URL" \
+            --arg base "$PR_BASE" --arg head "$PR_HEAD" \
+            --arg add "$PR_ADDITIONS" --arg del "$PR_DELETIONS" --arg files "$PR_FILES" '
+            # Slack mrkdwn treats &, < and > as control characters.
+            def esc: gsub("&"; "&amp;") | gsub("<"; "&lt;") | gsub(">"; "&gt;");
+            {
+              text: "\($mentions) PR #\($number) \($verb) in \($repo): \($title | esc)",
+              blocks: [
+                {
+                  type: "section",
+                  text: {
+                    type: "mrkdwn",
+                    text: "\($mentions)\n:eyes: PR \($verb) in *\($repo)*\n*<\($url)|#\($number) \($title | esc)>*"
+                  }
+                },
+                {
+                  type: "context",
+                  elements: [
+                    {
+                      type: "mrkdwn",
+                      text: "`\($head | esc)` → `\($base | esc)`  •  \($files) files  •  +\($add) / -\($del)"
+                    }
+                  ]
+                }
+              ]
+            }')
+
+          curl -fsS -X POST -H 'Content-Type: application/json' --data "$payload" "$SLACK_WEBHOOK_URL"
