@@ -1,0 +1,64 @@
+# Package naming contract
+
+The generated project must carry the user's name, not the template's. Today a
+project created from a template keeps the template's own package name
+(`fsd-architecture-starter`, `fsd-nextjs`, `fsd-vue-starter`,
+`fsd-nuxt-starter`, `fsd-sveltekit`), so the identity of the template leaks
+into every project that uses it.
+
+This document is the contract for the naming rules. The rules live in
+`bin/core/package-name.mjs` and are enforced with
+[`validate-npm-package-name`](https://www.npmjs.com/package/validate-npm-package-name),
+which is the same validator npm itself uses.
+
+## Normalization rules
+
+`toPackageName(input)` converts a project name, a project path or a scoped
+package name into a name that can be published to npm.
+
+| Rule | Example | Result |
+| --- | --- | --- |
+| The name is lowercased | `MyApp` | `myapp` |
+| Only the last path segment is used | `apps/web` | `web` |
+| Spaces and unsupported characters become dashes | `my app` | `my-app` |
+| A leading `.`, `_` or `-` is removed | `_x` | `x` |
+| A Node.js core module name is suffixed | `http` | `http-app` |
+| Scoped names stay scoped | `@scope/x` | `@scope/x` |
+| Names longer than 214 characters are shortened | 300 `a` | 214 `a` |
+
+A name that has no usable characters at all falls back to `app`.
+
+### Why the core module rule exists
+
+npm refuses to publish a new package whose name is a Node.js core module, so
+`http`, `fs` and `path` cannot be used as package names. The suffix `-app`
+keeps the original intent readable while producing a name that npm accepts.
+The rule applies to unscoped names only, because npm accepts a core module
+name inside a scope.
+
+## API
+
+```js
+import { inspectPackageName, toPackageName } from "./bin/core/package-name.mjs";
+
+toPackageName("MyApp");
+// { name: "myapp", valid: false, changed: true, issues: ["the name is lowercased"] }
+
+inspectPackageName("MyApp");
+// { valid: false, errors: [], warnings: ["name can no longer contain capital letters"] }
+```
+
+- `name` — the normalized package name.
+- `valid` — whether the input was already a publishable npm name.
+- `changed` — whether the normalization altered the input.
+- `issues` — the human-readable reasons for every change, empty when the input
+  was already valid.
+
+`toPackageName` throws when the input cannot be converted into a valid name at
+all, for example an empty string or a scope without a name.
+
+## Scope
+
+This document covers the naming rules only. Writing the name into the generated
+project, removing the template leftovers and the CLI flags are tracked as
+separate tasks and documented here as they land.

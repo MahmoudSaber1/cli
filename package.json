@@ -21,7 +21,7 @@
     "fsd": "bin/index.mjs"
   },
   "scripts": {
-    "test": "node --check bin/index.mjs && node --check bin/commands/create-project.mjs && node --check bin/commands/inspect-project.mjs && node --check bin/commands/upgrade-project.mjs && node --check bin/upgrade/config.mjs && node --check bin/upgrade/manifest.mjs && node --check bin/upgrade/planner.mjs && node --check bin/upgrade/transaction.mjs && node --check bin/upgrade/validation.mjs && node --check bin/project-config.mjs && node --check bin/generator.mjs && node --check bin/core/command-runner.mjs && node --test tests/*.test.mjs",
+    "test": "node --check bin/index.mjs && node --check bin/commands/create-project.mjs && node --check bin/commands/inspect-project.mjs && node --check bin/commands/upgrade-project.mjs && node --check bin/upgrade/config.mjs && node --check bin/upgrade/manifest.mjs && node --check bin/upgrade/planner.mjs && node --check bin/upgrade/transaction.mjs && node --check bin/upgrade/validation.mjs && node --check bin/project-config.mjs && node --check bin/generator.mjs && node --check bin/core/command-runner.mjs && node --check bin/core/package-name.mjs && node --test tests/*.test.mjs",
     "check": "npm test && npm pack --dry-run",
     "start": "node ./bin/index.mjs",
     "smoke:published": "node scripts/post-release-smoke.mjs",
@@ -30,7 +30,8 @@
   "dependencies": {
     "chalk": "^6.0.1",
     "ora": "^9.4.0",
-    "prompts": "^2.4.2"
+    "prompts": "^2.4.2",
+    "validate-npm-package-name": "^7.0.2"
   },
   "files": [
     "bin",
