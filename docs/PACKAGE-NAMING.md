@@ -121,6 +121,28 @@ form suggested.
 Error: "--package-name MyApp" is not a valid npm package name (name can no longer contain capital letters). Use "myapp" instead.
 ```
 
+## The end-to-end check
+
+`scripts/ci/package-name-e2e.mjs` creates a project from every stable
+template and proves that the project carries its own identity:
+
+```sh
+node scripts/ci/package-name-e2e.mjs            # all five templates
+node scripts/ci/package-name-e2e.mjs react-vite # one template
+```
+
+The check asserts the `package.json` name, `private` flag and missing version,
+the npm lockfile name fields, the README title, the document title and the
+Next.js metadata title, and that no template identity is left anywhere.
+
+The template identity is read from the pinned template commit, so the check
+does not depend on a hardcoded list of template names: it fetches the template
+at the same immutable ref the CLI uses, collects its package name and its
+titles, and asserts that none of them survives in the created project.
+
+The CI job `package-name-e2e` runs it for all five templates and uploads a JSON
+report per template.
+
 ## API
 
 ```js
