@@ -15,7 +15,7 @@ import {
 } from "../core/project-lifecycle.mjs";
 import { applyPackageIdentity } from "../core/package-identity.mjs";
 import { applyTemplateIdentity } from "../core/template-identity.mjs";
-import { toPackageName } from "../core/package-name.mjs";
+import { describePackageNameSuggestion } from "../core/package-name.mjs";
 import {
   getAvailableTemplate,
   getTemplate,
@@ -146,6 +146,38 @@ function showProjectPlan({ projectName, targetDir, template, projectConfig, opti
   console.log(chalk.dim(`  No files were changed for ${projectName}.`));
 }
 
+/**
+ * Resolves the npm package name of a project.
+ *
+ * A project name that is a valid folder name is not always a valid npm
+ * package name: "MyApp" is a fine folder but not a publishable package. The
+ * CLI suggests the normalized name and asks the user to confirm it. Declining
+ * keeps the name the user typed.
+ *
+ * @param {string} projectName
+ * @param {{yes?: boolean}} options
+ * @param {Function} ask the prompt implementation, injectable for the tests
+ * @returns {Promise<string>} the package name
+ */
+export async function resolvePackageName(projectName, options = {}, ask = prompts) {
+  const suggestion = describePackageNameSuggestion(projectName);
+  if (suggestion.valid || options.yes) {
+    return suggestion.name;
+  }
+
+  const answer = await ask(
+    {
+      type: "confirm",
+      name: "useSuggestedPackageName",
+      message: suggestion.message,
+      initial: true,
+    },
+    onCancel
+  );
+
+  return answer.useSuggestedPackageName ? suggestion.name : suggestion.raw;
+}
+
 export async function runCreateProject(options) {
   showBanner();
   const projectName = await selectProjectName(options.projectName);
@@ -160,7 +192,7 @@ export async function runCreateProject(options) {
 
   // The folder name and the package name are independent: the folder keeps
   // the name the user typed, the package name is the npm-safe version of it.
-  const packageName = toPackageName(projectName).name;
+  const packageName = await resolvePackageName(projectName, options);
 
   const template = await selectTemplate(options.framework);
 

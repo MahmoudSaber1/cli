@@ -25,6 +25,9 @@ All notable changes to `create-fsd-architecture` are documented here.
   title (`index.html` and the Next.js metadata export) or the Angular project
   name. The slots are rewritten structurally, so the result does not depend on
   what the template calls itself.
+- A project name that is a valid folder name but not a valid npm package name
+  is now caught before the project is created: the prompt suggests the
+  normalized name, explains why it changed and asks the user to confirm it.
 
 ## 2.7.1 - 2026-10-29
 

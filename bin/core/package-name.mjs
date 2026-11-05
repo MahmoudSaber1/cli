@@ -86,15 +86,6 @@ export function toPackageName(input) {
     throw new Error("A project name is required to derive a package name.");
   }
 
-  // A name that npm already accepts is returned exactly as typed. The
-  // sanitizer below would otherwise rewrite some valid names (collapsing
-  // "my--app" to "my-app", "my..app" to "my.app", stripping the trailing
-  // dash of "app-") and, because the input counts as valid, the change
-  // would be reported nowhere.
-  if (validateNpmPackageName(raw).validForNewPackages) {
-    return { name: raw, valid: true, changed: false, issues: [] };
-  }
-
   const issues = [];
   let scope = null;
   let body = raw;
@@ -115,6 +106,16 @@ export function toPackageName(input) {
     );
   }
   const segment = segments[segments.length - 1];
+
+  // A name that npm already accepts is returned exactly as typed. The
+  // sanitizer below would otherwise rewrite some valid names (collapsing
+  // "my--app" to "my-app", "my..app" to "my.app", stripping the trailing
+  // dash of "app-") and, because the input counts as valid, the change
+  // would be reported nowhere. The result keeps the same shape as the
+  // sanitized path below, including the typed last segment as `raw`.
+  if (validateNpmPackageName(raw).validForNewPackages) {
+    return { name: raw, valid: true, changed: false, raw: segment, issues: [] };
+  }
 
   if (segments.length > 1) {
     issues.push("only the last path segment is used as the package name");
@@ -173,7 +174,29 @@ export function toPackageName(input) {
     name,
     valid,
     changed: name !== raw,
+    raw: segment,
     issues,
+  };
+}
+
+/**
+ * Describes what the CLI has to tell the user about a project name that is a
+ * valid folder name but not a valid npm package name.
+ *
+ * @param {string} input
+ * @returns {{valid: boolean, name: string, raw: string, message: string|null}}
+ */
+export function describePackageNameSuggestion(input) {
+  const suggestion = toPackageName(input);
+  return {
+    valid: suggestion.valid,
+    name: suggestion.name,
+    raw: suggestion.raw,
+    message: suggestion.valid
+      ? null
+      : `"${input}" is not a valid npm package name (${suggestion.issues.join(
+          ", "
+        )}). Use "${suggestion.name}" as the package name?`,
   };
 }
 
