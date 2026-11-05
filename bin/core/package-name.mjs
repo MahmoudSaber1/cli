@@ -86,6 +86,15 @@ export function toPackageName(input) {
     throw new Error("A project name is required to derive a package name.");
   }
 
+  // A name that npm already accepts is returned exactly as typed. The
+  // sanitizer below would otherwise rewrite some valid names (collapsing
+  // "my--app" to "my-app", "my..app" to "my.app", stripping the trailing
+  // dash of "app-") and, because the input counts as valid, the change
+  // would be reported nowhere.
+  if (validateNpmPackageName(raw).validForNewPackages) {
+    return { name: raw, valid: true, changed: false, issues: [] };
+  }
+
   const issues = [];
   let scope = null;
   let body = raw;

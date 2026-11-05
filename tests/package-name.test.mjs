@@ -22,6 +22,16 @@ test("toPackageName reports whether the given name was already valid", () => {
   assert.equal(toPackageName("@scope/x").changed, false);
 });
 
+test("toPackageName returns an already valid name exactly as typed", () => {
+  for (const name of ["my--app", "my..app", "app-"]) {
+    const result = toPackageName(name);
+    assert.equal(result.name, name);
+    assert.equal(result.valid, true);
+    assert.equal(result.changed, false);
+    assert.deepEqual(result.issues, []);
+  }
+});
+
 test("toPackageName explains every change it applies", () => {
   assert.deepEqual(toPackageName("MyApp").issues, ["the name is lowercased"]);
   assert.deepEqual(toPackageName("my app").issues, [
