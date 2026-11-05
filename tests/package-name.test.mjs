@@ -69,6 +69,12 @@ test("toPackageName shortens names longer than the npm limit", () => {
   assert.match(toPackageName("a".repeat(300)).issues[0], /shortened/);
 });
 
+test("toPackageName keeps the typed name available next to the normalized one", () => {
+  assert.equal(toPackageName("MyApp").raw, "MyApp");
+  assert.equal(toPackageName("apps/web").raw, "web");
+  assert.equal(toPackageName("@scope/x").raw, "x");
+});
+
 test("toPackageName rejects input without a usable name", () => {
   assert.throws(() => toPackageName(""), /project name is required/i);
   assert.throws(() => toPackageName("   "), /project name is required/i);

@@ -82,6 +82,23 @@ The templates' own demo content — the hero widget, `templateInfo` and the
 starter pages — is left as it is. That content is the starting point the
 generated application replaces, not project metadata.
 
+## The CLI behavior
+
+The folder name and the package name are independent. The folder keeps the
+name the user typed; the package name is the npm-safe version of it.
+
+A project name can be a valid folder name and still not be a valid npm package
+name — `MyApp` is a fine folder but not a publishable package. When the CLI
+finds such a name, it suggests the normalized one and asks the user to
+confirm it:
+
+```
+"MyApp" is not a valid npm package name (the name is lowercased). Use "myapp" as the package name?
+```
+
+Confirming uses the suggested name. Declining keeps the name the user typed.
+A name that is already valid is never questioned.
+
 ## API
 
 ```js
