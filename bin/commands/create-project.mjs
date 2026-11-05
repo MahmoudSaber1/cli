@@ -69,7 +69,7 @@ async function selectTemplate(framework) {
     {
       type: "select",
       name: "template",
-      message: "Select project type",
+      message: "Select framework",
       choices: listTemplates().map((template) => ({
         title: template.available
           ? template.title

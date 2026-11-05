@@ -36,7 +36,7 @@ test("--yes without a framework fails before prompting or replacing a directory"
   });
   assert.equal(result.status, 1);
   assert.match(result.stderr, /--framework is required/);
-  assert.doesNotMatch(result.stdout, /Select project type/);
+  assert.doesNotMatch(result.stdout, /Select framework/);
   assert.equal(fs.readFileSync(path.join(cwd, "app", "sentinel"), "utf8"), "original");
 });
 
