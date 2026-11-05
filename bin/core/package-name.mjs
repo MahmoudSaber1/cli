@@ -184,7 +184,7 @@ export function toPackageName(input) {
  * valid folder name but not a valid npm package name.
  *
  * @param {string} input
- * @returns {{valid: boolean, name: string, raw: string, message: string|null}}
+ * @returns {{valid: boolean, name: string, raw: string, issues: string[], message: string|null}}
  */
 export function describePackageNameSuggestion(input) {
   const suggestion = toPackageName(input);
@@ -192,6 +192,7 @@ export function describePackageNameSuggestion(input) {
     valid: suggestion.valid,
     name: suggestion.name,
     raw: suggestion.raw,
+    issues: suggestion.issues,
     message: suggestion.valid
       ? null
       : `"${input}" is not a valid npm package name (${suggestion.issues.join(

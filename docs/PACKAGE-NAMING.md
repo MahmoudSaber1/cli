@@ -99,6 +99,13 @@ confirm it:
 Confirming uses the suggested name. Declining keeps the name the user typed.
 A name that is already valid is never questioned.
 
+`--yes` never asks and never fails on a name that can be fixed: it uses the
+normalized name and says so.
+
+```
+"MyApp" is not a valid npm package name (the name is lowercased). Using "myapp" instead.
+```
+
 ## API
 
 ```js

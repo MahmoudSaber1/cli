@@ -28,6 +28,8 @@ All notable changes to `create-fsd-architecture` are documented here.
 - A project name that is a valid folder name but not a valid npm package name
   is now caught before the project is created: the prompt suggests the
   normalized name, explains why it changed and asks the user to confirm it.
+- `--yes` never fails on a name that can be fixed: it uses the normalized
+  package name and prints which name it used.
 
 ## 2.7.1 - 2026-10-29
 
