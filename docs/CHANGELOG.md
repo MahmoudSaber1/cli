@@ -30,6 +30,9 @@ All notable changes to `create-fsd-architecture` are documented here.
   normalized name, explains why it changed and asks the user to confirm it.
 - `--yes` never fails on a name that can be fixed: it uses the normalized
   package name and prints which name it used.
+- `--package-name <name>` sets the npm package name independently of the folder
+  name. The name must be publishable on npm; an invalid one is refused with the
+  valid form suggested.
 
 ## 2.7.1 - 2026-10-29
 

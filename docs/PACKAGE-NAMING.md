@@ -106,6 +106,21 @@ normalized name and says so.
 "MyApp" is not a valid npm package name (the name is lowercased). Using "myapp" instead.
 ```
 
+`--package-name <name>` overrides the package name independently of the folder
+name:
+
+```sh
+fsd create MyApp --framework react-vite --package-name @acme/shop --yes
+```
+
+The folder is `MyApp`, the package is `@acme/shop`. An explicit name is never
+rewritten behind the user's back: an invalid one is refused with the valid
+form suggested.
+
+```
+Error: "--package-name MyApp" is not a valid npm package name (name can no longer contain capital letters). Use "myapp" instead.
+```
+
 ## API
 
 ```js

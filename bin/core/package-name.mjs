@@ -202,6 +202,39 @@ export function describePackageNameSuggestion(input) {
 }
 
 /**
+ * Validates a package name the user asked for explicitly.
+ *
+ * An explicit name is never rewritten behind the user's back: an invalid one
+ * is refused with the valid form suggested.
+ *
+ * @param {string} input
+ * @returns {string} the validated package name
+ */
+export function resolveExplicitPackageName(input) {
+  const raw = typeof input === "string" ? input.trim() : "";
+  if (!raw) {
+    throw new Error('"--package-name" requires a package name.');
+  }
+
+  const validation = inspectPackageName(raw);
+  if (validation.valid) return raw;
+
+  const reasons = [...validation.errors, ...validation.warnings].join(", ");
+  let suggestion = "";
+  try {
+    suggestion = toPackageName(raw).name;
+  } catch {
+    suggestion = "";
+  }
+
+  throw new Error(
+    `"--package-name ${raw}" is not a valid npm package name${
+      reasons ? ` (${reasons})` : ""
+    }.${suggestion ? ` Use "${suggestion}" instead.` : ""}`
+  );
+}
+
+/**
  * Reports whether a value can be published to npm as it is.
  *
  * @param {string} input

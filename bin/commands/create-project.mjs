@@ -15,7 +15,10 @@ import {
 } from "../core/project-lifecycle.mjs";
 import { applyPackageIdentity } from "../core/package-identity.mjs";
 import { applyTemplateIdentity } from "../core/template-identity.mjs";
-import { describePackageNameSuggestion } from "../core/package-name.mjs";
+import {
+  describePackageNameSuggestion,
+  resolveExplicitPackageName,
+} from "../core/package-name.mjs";
 import {
   getAvailableTemplate,
   getTemplate,
@@ -157,12 +160,22 @@ function showProjectPlan({ projectName, targetDir, template, projectConfig, opti
  * `--yes` never asks and never fails on a name that can be fixed: it uses the
  * normalized name and reports it.
  *
+ * `--package-name` overrides the package name independently of the folder
+ * name. It is never rewritten: an invalid name is refused.
+ *
  * @param {string} projectName
- * @param {{yes?: boolean}} options
+ * @param {{yes?: boolean, packageName?: string}} options
  * @param {Function} ask the prompt implementation, injectable for the tests
  * @returns {Promise<{packageName: string, warning: string|null}>}
  */
 export async function resolvePackageName(projectName, options = {}, ask = prompts) {
+  if (options.packageName) {
+    return {
+      packageName: resolveExplicitPackageName(options.packageName),
+      warning: null,
+    };
+  }
+
   const suggestion = describePackageNameSuggestion(projectName);
   if (suggestion.valid) {
     return { packageName: suggestion.name, warning: null };

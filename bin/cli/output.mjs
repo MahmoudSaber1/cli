@@ -54,6 +54,7 @@ Create options:
   -f, --framework <id>          Select a framework without the template prompt
   -y, --yes                     Accept defaults (requires name and --framework)
       --package-manager <id>    Select npm, pnpm, yarn, or bun
+      --package-name <name>     Set the npm package name independently of the folder name
       --api-client <id>         Select axios or fetch
       --server-state <id>       Override the framework server-state default
       --client-state <id>       Override the framework client-state default
