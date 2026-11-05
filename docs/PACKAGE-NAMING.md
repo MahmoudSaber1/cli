@@ -57,6 +57,31 @@ The `bun.lock` file is JSONC — it allows trailing commas — so it cannot be
 parsed with `JSON.parse` or rewritten with `JSON.stringify`. Its root
 workspace name is replaced in place instead.
 
+## Where the template leftovers are removed
+
+`applyTemplateIdentity(targetDir, projectName)` in
+`bin/core/template-identity.mjs` rewrites the slots that carry the template's
+own identity, right after the template is copied:
+
+| Slot | File | Example template value |
+| --- | --- | --- |
+| README title | `README.md` | `# FSD Architecture Starter` |
+| Document title | `index.html` | `<title>FSD Architecture Starter</title>` |
+| Document title | `src/app/layout.route.tsx` | `title: "FSD Next.js Starter"` |
+| Angular project name | `angular.json` | `projects.<id>.projectName` |
+
+The slots are rewritten structurally rather than by matching the template's
+wording, so the replacement does not depend on what the template happens to
+call itself: the React title is `FSD Architecture Starter` and the Vue one is
+`FSD CLI — Vue + Vite`, and both are replaced the same way.
+
+The title is the last path segment of the project name, so a project created
+as `apps/web` is titled `web`.
+
+The templates' own demo content — the hero widget, `templateInfo` and the
+starter pages — is left as it is. That content is the starting point the
+generated application replaces, not project metadata.
+
 ## API
 
 ```js

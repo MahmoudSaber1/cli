@@ -14,6 +14,7 @@ import {
   verifyCommitlintRejectsInvalidMessage,
 } from "../core/project-lifecycle.mjs";
 import { applyPackageIdentity } from "../core/package-identity.mjs";
+import { applyTemplateIdentity } from "../core/template-identity.mjs";
 import { toPackageName } from "../core/package-name.mjs";
 import {
   getAvailableTemplate,
@@ -210,6 +211,7 @@ export async function runCreateProject(options) {
   }).start();
   try {
     applyPackageIdentity(targetDir, packageName);
+    applyTemplateIdentity(targetDir, projectName);
     prepareProject(targetDir, projectConfig);
     writeInitialManifest(targetDir, projectConfig, readCliVersion());
     setupSpinner.succeed(chalk.green("FSD stack, Git, and Husky configured."));

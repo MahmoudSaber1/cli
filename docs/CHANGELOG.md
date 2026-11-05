@@ -21,6 +21,10 @@ All notable changes to `create-fsd-architecture` are documented here.
   templates leaked `fsd-architecture-starter`, `fsd-nextjs`, `fsd-vue-starter`,
   `fsd-nuxt-starter`, `fsd-sveltekit` and the stale `mudular-structure-v2`
   bun lockfile name.
+- The template's own name no longer survives in the README title, the document
+  title (`index.html` and the Next.js metadata export) or the Angular project
+  name. The slots are rewritten structurally, so the result does not depend on
+  what the template calls itself.
 
 ## 2.7.1 - 2026-10-29
 
