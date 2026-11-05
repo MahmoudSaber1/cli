@@ -36,6 +36,27 @@ keeps the original intent readable while producing a name that npm accepts.
 The rule applies to unscoped names only, because npm accepts a core module
 name inside a scope.
 
+## Where the name is written
+
+`applyPackageIdentity(targetDir, packageName)` in
+`bin/core/package-identity.mjs` writes the name into the files the template
+ships, right after the template is copied:
+
+| File | Change |
+| --- | --- |
+| `package.json` | `name` is the project name, `private` is `true`, the template `version` is removed |
+| `package-lock.json` | `name` and `packages[""].name` follow the project name, the template `version` is removed |
+| `bun.lock` | the root workspace `name` follows the project name |
+
+The generated project is private and versionless: the template version belongs
+to the template, not to the application that was generated from it. npm accepts
+a `package.json` without a `version`, and the lockfile stays consistent with
+it.
+
+The `bun.lock` file is JSONC — it allows trailing commas — so it cannot be
+parsed with `JSON.parse` or rewritten with `JSON.stringify`. Its root
+workspace name is replaced in place instead.
+
 ## API
 
 ```js

@@ -13,6 +13,8 @@ import {
   prepareProject,
   verifyCommitlintRejectsInvalidMessage,
 } from "../core/project-lifecycle.mjs";
+import { applyPackageIdentity } from "../core/package-identity.mjs";
+import { toPackageName } from "../core/package-name.mjs";
 import {
   getAvailableTemplate,
   getTemplate,
@@ -155,6 +157,10 @@ export async function runCreateProject(options) {
     );
   }
 
+  // The folder name and the package name are independent: the folder keeps
+  // the name the user typed, the package name is the npm-safe version of it.
+  const packageName = toPackageName(projectName).name;
+
   const template = await selectTemplate(options.framework);
 
   // Fail before any download or write so the user never gets a project that
@@ -203,6 +209,7 @@ export async function runCreateProject(options) {
     color: "cyan",
   }).start();
   try {
+    applyPackageIdentity(targetDir, packageName);
     prepareProject(targetDir, projectConfig);
     writeInitialManifest(targetDir, projectConfig, readCliVersion());
     setupSpinner.succeed(chalk.green("FSD stack, Git, and Husky configured."));

@@ -13,6 +13,15 @@ All notable changes to `create-fsd-architecture` are documented here.
   input was already valid and why it changed. The rules are documented in
   `docs/PACKAGE-NAMING.md`.
 
+### Fixed
+
+- A created project no longer inherits the template's package identity. The
+  generated `package.json` carries the project's own name and is private and
+  versionless, and the npm and bun lockfile name fields follow it. The
+  templates leaked `fsd-architecture-starter`, `fsd-nextjs`, `fsd-vue-starter`,
+  `fsd-nuxt-starter`, `fsd-sveltekit` and the stale `mudular-structure-v2`
+  bun lockfile name.
+
 ## 2.7.1 - 2026-10-29
 
 Published npm gitHead: `287b61fc742d49e37b9c41f7c759aa1486b275d2`,
