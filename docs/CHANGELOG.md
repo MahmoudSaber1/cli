@@ -33,6 +33,10 @@ All notable changes to `create-fsd-architecture` are documented here.
 - `--package-name <name>` sets the npm package name independently of the folder
   name. The name must be publishable on npm; an invalid one is refused with the
   valid form suggested.
+- A `package-name-e2e` CI job creates a project from every stable template and
+  asserts that the project carries its own package name, its own titles and no
+  template identity. The template identity is read from the pinned template
+  commit, so the check does not depend on a hardcoded list of template names.
 
 ## 2.7.1 - 2026-10-29
 

@@ -135,6 +135,33 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
 
+  package-name-e2e:
+    name: Package name E2E / ${{ matrix.framework }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        framework: [react-vite, nextjs, vue-vite, nuxt, sveltekit]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Create the project and assert the package identity
+        env:
+          CI_ARTIFACTS_DIR: ${{ github.workspace }}/ci-artifacts
+        run: node scripts/ci/package-name-e2e.mjs ${{ matrix.framework }}
+      - name: Upload the package name report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: package-name-e2e-${{ matrix.framework }}
+          path: ci-artifacts/package-name-e2e/
+          if-no-files-found: ignore
+          retention-days: 14
+
   cross-os-cli:
     name: Cross-OS CLI / ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
