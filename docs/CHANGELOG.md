@@ -2,6 +2,17 @@
 
 All notable changes to `create-fsd-architecture` are documented here.
 
+## Unreleased
+
+### Added
+
+- `bin/core/package-name.mjs`: `toPackageName()` converts a project name, a
+  project path or a scoped package name into a publishable npm package name
+  (lowercase, last path segment, spaces to dashes, no leading `.` or `_`, no
+  Node.js core module name, scoped names stay scoped). It reports whether the
+  input was already valid and why it changed. The rules are documented in
+  `docs/PACKAGE-NAMING.md`.
+
 ## 2.7.1 - 2026-10-29
 
 Published npm gitHead: `287b61fc742d49e37b9c41f7c759aa1486b275d2`,
