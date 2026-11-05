@@ -154,15 +154,27 @@ function showProjectPlan({ projectName, targetDir, template, projectConfig, opti
  * CLI suggests the normalized name and asks the user to confirm it. Declining
  * keeps the name the user typed.
  *
+ * `--yes` never asks and never fails on a name that can be fixed: it uses the
+ * normalized name and reports it.
+ *
  * @param {string} projectName
  * @param {{yes?: boolean}} options
  * @param {Function} ask the prompt implementation, injectable for the tests
- * @returns {Promise<string>} the package name
+ * @returns {Promise<{packageName: string, warning: string|null}>}
  */
 export async function resolvePackageName(projectName, options = {}, ask = prompts) {
   const suggestion = describePackageNameSuggestion(projectName);
-  if (suggestion.valid || options.yes) {
-    return suggestion.name;
+  if (suggestion.valid) {
+    return { packageName: suggestion.name, warning: null };
+  }
+
+  if (options.yes) {
+    return {
+      packageName: suggestion.name,
+      warning: `"${projectName}" is not a valid npm package name (${suggestion.issues.join(
+        ", "
+      )}). Using "${suggestion.name}" instead.`,
+    };
   }
 
   const answer = await ask(
@@ -175,7 +187,12 @@ export async function resolvePackageName(projectName, options = {}, ask = prompt
     onCancel
   );
 
-  return answer.useSuggestedPackageName ? suggestion.name : suggestion.raw;
+  return {
+    packageName: answer.useSuggestedPackageName
+      ? suggestion.name
+      : suggestion.raw,
+    warning: null,
+  };
 }
 
 export async function runCreateProject(options) {
@@ -192,7 +209,8 @@ export async function runCreateProject(options) {
 
   // The folder name and the package name are independent: the folder keeps
   // the name the user typed, the package name is the npm-safe version of it.
-  const packageName = await resolvePackageName(projectName, options);
+  const { packageName, warning } = await resolvePackageName(projectName, options);
+  if (warning) console.log(chalk.yellow(`  ${warning}`));
 
   const template = await selectTemplate(options.framework);
 
