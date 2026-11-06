@@ -8,7 +8,8 @@ import {
   getProjectTargetOption,
   isProjectTargetSelection,
 } from "../bin/core/project-target.mjs";
-import { resolveProjectTarget } from "../bin/commands/create-project.mjs";
+import { resolveProjectTarget, selectTemplate } from "../bin/commands/create-project.mjs";
+import { listTemplatesForTarget } from "../bin/core/template-registry.mjs";
 
 function fakeAsk(answer) {
   const calls = [];
@@ -93,4 +94,46 @@ test("the prompt offers the four targets with web preselected", async () => {
     ["web", "multi-web", "mobile", "universal"]
   );
   assert.equal(question.choices[question.initial].value, "web");
+});
+
+const WEB_TEMPLATES = ["react-vite", "nextjs", "vue-vite", "nuxt", "sveltekit"];
+
+test("templates are filtered to the adapters serving the chosen target", () => {
+  const values = (selection) => listTemplatesForTarget(selection).map((template) => template.value);
+  assert.deepEqual(values("web"), WEB_TEMPLATES);
+  assert.deepEqual(values("multi-web"), WEB_TEMPLATES);
+  // Universal creates one app at a time: an adapter for either side qualifies.
+  assert.deepEqual(values("universal"), WEB_TEMPLATES);
+  // No adapter serves mobile yet, so the filtered list is empty.
+  assert.deepEqual(values("mobile"), []);
+  assert.throws(() => listTemplatesForTarget("desktop"), /Unknown project target "desktop"/);
+});
+
+test("the framework step only offers templates that support the target", async () => {
+  const ask = fakeAsk({ template: "nextjs" });
+  const template = await selectTemplate(undefined, "web", ask);
+  assert.equal(template.value, "nextjs");
+  assert.deepEqual(
+    ask.calls[0].choices.map((choice) => choice.value),
+    WEB_TEMPLATES
+  );
+});
+
+test("the framework step fails clearly when no adapter supports the target", async () => {
+  const ask = fakeAsk({});
+  await assert.rejects(
+    () => selectTemplate(undefined, "mobile", ask),
+    /No frameworks support the Mobile target yet\./
+  );
+  assert.equal(ask.calls.length, 0);
+});
+
+test("an explicit framework must support the chosen target", async () => {
+  const ask = fakeAsk({});
+  assert.equal((await selectTemplate("react-vite", "web", ask)).value, "react-vite");
+  await assert.rejects(
+    () => selectTemplate("react-vite", "mobile", ask),
+    /React \+ Vite does not support the Mobile target\./
+  );
+  assert.equal(ask.calls.length, 0);
 });
