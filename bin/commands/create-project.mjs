@@ -28,7 +28,7 @@ import {
 import {
   getAvailableTemplate,
   getTemplate,
-  listTemplates,
+  listTemplatesForTarget,
 } from "../core/template-registry.mjs";
 import { checkNodeVersion } from "../core/runtime-requirements.mjs";
 import { normalizeProjectConfig } from "../project-config.mjs";
@@ -74,15 +74,28 @@ async function selectProjectName(projectName) {
   return answer.projectName;
 }
 
-async function selectTemplate(framework) {
-  if (framework) return getAvailableTemplate(framework);
+export async function selectTemplate(framework, target = DEFAULT_PROJECT_TARGET, ask = prompts) {
+  const supported = listTemplatesForTarget(target);
+  const targetTitle = getProjectTargetOption(target).title;
 
-  const answer = await prompts(
+  if (framework) {
+    const template = getAvailableTemplate(framework);
+    if (!supported.some((candidate) => candidate.value === template.value)) {
+      throw new Error(`${template.title} does not support the ${targetTitle} target.`);
+    }
+    return template;
+  }
+
+  if (supported.length === 0) {
+    throw new Error(`No frameworks support the ${targetTitle} target yet.`);
+  }
+
+  const answer = await ask(
     {
       type: "select",
       name: "template",
       message: "Select framework",
-      choices: listTemplates().map((template) => ({
+      choices: supported.map((template) => ({
         title: template.available
           ? template.title
           : `${template.title} ${chalk.dim("(Coming Soon)")}`,
@@ -280,7 +293,7 @@ export async function runCreateProject(options) {
 
   const target = await resolveProjectTarget(options);
 
-  const template = await selectTemplate(options.framework);
+  const template = await selectTemplate(options.framework, target);
 
   // Fail before any download or write so the user never gets a project that
   // the current Node runtime cannot build.

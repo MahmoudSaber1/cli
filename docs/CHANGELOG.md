@@ -6,6 +6,11 @@ All notable changes to `create-fsd-architecture` are documented here.
 
 ### Added
 
+- The framework step of the create flow is now filtered by the chosen
+  project target: `listTemplatesForTarget` in the template registry keeps
+  only templates whose adapter serves the target, an explicit framework
+  that does not serve it is refused, and a target no adapter serves yet
+  (Mobile) stops with a clear message instead of an empty prompt.
 - The create flow now asks for a **project target** (Web, Multi-web,
   Mobile, Universal) between the project name and the framework. The
   selection is flow state in the new `bin/core/project-target.mjs` — it

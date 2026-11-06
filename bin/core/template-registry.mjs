@@ -1,5 +1,6 @@
 import { getCapabilities } from "./capability-matrix.mjs";
-import { hasFrameworkAdapter } from "./frameworks/index.mjs";
+import { hasFrameworkAdapter, listFrameworkAdaptersByTarget } from "./frameworks/index.mjs";
+import { adapterTargetsForSelection } from "./project-target.mjs";
 
 const templates = [
   {
@@ -76,6 +77,27 @@ export function listTemplates({ includePlanned = true } = {}) {
   return includePlanned
     ? [...TEMPLATE_REGISTRY]
     : TEMPLATE_REGISTRY.filter((template) => template.available);
+}
+
+/**
+ * Lists the templates whose adapter supports a project target selection.
+ *
+ * A selection maps to one or more adapter targets (bin/core/project-target.mjs);
+ * a template qualifies when its adapter serves any of them — a "universal"
+ * project still creates one app at a time, so an adapter for either side is
+ * a candidate. Selections no adapter serves yet (today: "mobile") return
+ * an empty list; presenting that state is the caller's job.
+ *
+ * @param {string} selection - A project target selection ("web", "multi-web", "mobile", "universal").
+ * @returns {object[]} The matching templates, in registry order.
+ */
+export function listTemplatesForTarget(selection) {
+  const supportedIds = new Set(
+    adapterTargetsForSelection(selection).flatMap((target) =>
+      listFrameworkAdaptersByTarget(target).map((adapter) => adapter.id)
+    )
+  );
+  return listTemplates().filter((template) => supportedIds.has(template.value));
 }
 
 export function getTemplate(templateId) {
