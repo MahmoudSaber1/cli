@@ -11,6 +11,10 @@ All notable changes to `create-fsd-architecture` are documented here.
   values and conflicting spellings fail with a usage error, an agreed
   shorthand resolves into the same `target` option the prompt step uses,
   and the flags are listed in `--help`.
+- Non-interactive behaviour is pinned by regression tests: `--yes
+  --framework` commands resolve the project target to Web, never prompt,
+  and plan exactly as before, while an explicit target is never
+  overridden by `--yes`.
 - The framework step of the create flow is now filtered by the chosen
   project target: `listTemplatesForTarget` in the template registry keeps
   only templates whose adapter serves the target, an explicit framework
