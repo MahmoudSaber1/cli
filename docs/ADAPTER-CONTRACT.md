@@ -68,9 +68,14 @@ dependencyVersions: { axios: "^1.20.0", "@tanstack/react-query": "^5.102.8" /* .
 ## Generators
 
 `generators` lists the `fsd generate` structure types the adapter supports.
-The implementations live per family under `bin/generators/`; the adapter
-only declares support. Asking an adapter for an unsupported generator is an
-error, and an inspection-only adapter declares `generators: []`.
+`generators` lists the `fsd generate` structure types the adapter supports.
+The implementations live per family under `bin/generators/` behind the
+shared family generator interface (`bin/generators/family-generators.mjs`):
+each family module exports a frozen `{ family, createFilePlan }` object,
+and the generate flow resolves the adapter's family through that registry
+instead of branching on it. The adapter only declares support. Asking an
+adapter for an unsupported generator is an error, and an inspection-only
+adapter declares `generators: []`.
 
 ## Dependency versions
 

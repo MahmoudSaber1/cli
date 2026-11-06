@@ -6,6 +6,12 @@ All notable changes to `create-fsd-architecture` are documented here.
 
 ### Added
 
+- Generators now sit behind one shared family interface:
+  `bin/generators/family-generators.mjs` registers a frozen
+  `{ family, createFilePlan }` generator per family, and the generate flow
+  resolves the adapter's family through it instead of branching. The React
+  planner moved out of `bin/generator.mjs` into `bin/generators/react.mjs`,
+  alongside the existing Vue and Svelte planners. Behaviour is unchanged.
 - Adapters declare the project targets they can create — every current
   adapter declares `targets: ["web"]` — and the registry can list adapters
   per target (`listFrameworkAdaptersByTarget`). Registration now enforces

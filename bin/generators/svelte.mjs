@@ -516,3 +516,12 @@ ${fields}
 </form>
 `;
 }
+
+/**
+ * The Svelte family generator, implementing the shared family generator
+ * interface (see family-generators.mjs).
+ */
+export const svelteFamilyGenerator = Object.freeze({
+  family: "svelte",
+  createFilePlan: createSvelteFilePlan,
+});

@@ -574,3 +574,12 @@ function fieldType(name) {
     ? "string"
     : "unknown";
 }
+
+/**
+ * The Vue family generator, implementing the shared family generator
+ * interface (see family-generators.mjs).
+ */
+export const vueFamilyGenerator = Object.freeze({
+  family: "vue",
+  createFilePlan: createVueFilePlan,
+});
