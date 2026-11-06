@@ -13,12 +13,12 @@
  *
  * Contract v2 adds three fields that v1 adapters did not declare:
  * `targets`, `capabilities` and `generators`. The capabilities and
- * generators have since moved into each adapter (they mirror the
- * capability matrix until the matrix is derived from the adapters);
- * `targets` is still populated by the targets migration, after which the
- * registry learns to filter by target. So by default the validator only
- * checks the v2 fields when they are present. Pass `{ requireV2: true }`
- * to enforce the full v2 shape.
+ * generators have since moved into each adapter, and the capability
+ * matrix is derived from them; `targets` is still populated by the
+ * targets migration, after which the registry learns to filter by
+ * target. So by default the validator only checks the v2 fields when
+ * they are present. Pass `{ requireV2: true }` to enforce the full v2
+ * shape.
  */
 
 /** The current adapter contract version. */
@@ -64,8 +64,8 @@ export const CAPABILITY_IDS = Object.freeze([
 /**
  * The capability options one adapter offers, with the default option for
  * each capability. Every default must be one of the declared options for
- * that capability. This is the shape `bin/core/capability-matrix.mjs`
- * serves today; contract v2 moves it onto the adapter itself.
+ * that capability. `bin/core/capability-matrix.mjs` derives its rows from
+ * these declarations, so the adapter is the single source of truth.
  *
  * @typedef {object} AdapterCapabilities
  * @property {Record<CapabilityId, string>} defaults - Default option per capability.

@@ -66,21 +66,59 @@ test("registered adapters do not declare targets yet", () => {
   }
 });
 
-test("adapter capabilities and generators match the capability matrix", () => {
-  // The data moved verbatim: until the matrix is derived from the adapters,
-  // this parity check keeps the two copies from drifting apart.
-  for (const adapter of listFrameworkAdapters()) {
+test("capability matrix is derived from the adapters", () => {
+  const adapters = listFrameworkAdapters();
+  assert.deepEqual(
+    Object.keys(CAPABILITY_MATRIX).sort(),
+    adapters.map((adapter) => adapter.id).sort()
+  );
+  for (const adapter of adapters) {
     const row = CAPABILITY_MATRIX[adapter.id];
-    assert.ok(row, `capability matrix row for "${adapter.id}"`);
-    const defaults = {};
-    const expected = { defaults };
     for (const capabilityId of ["apiClient", "serverState", "clientState", "forms"]) {
-      defaults[capabilityId] = row.defaults[capabilityId];
-      expected[capabilityId] = [...row[capabilityId]];
+      assert.deepEqual(row[capabilityId], adapter.capabilities[capabilityId], `adapter "${adapter.id}"`);
+      assert.equal(row.defaults[capabilityId], adapter.capabilities.defaults[capabilityId]);
     }
-    assert.deepEqual(adapter.capabilities, expected, `adapter "${adapter.id}" capabilities`);
-    assert.deepEqual(adapter.generators, [...row.generators], `adapter "${adapter.id}" generators`);
+    assert.deepEqual(row.generators, adapter.generators, `adapter "${adapter.id}" generators`);
+    assert.equal(row.defaults.packageManager, "npm");
+    assert.deepEqual(
+      row.packageManager,
+      adapter.inspectionOnly ? ["npm"] : ["npm", "pnpm", "yarn", "bun"],
+      `adapter "${adapter.id}" package managers`
+    );
   }
+});
+
+test("derived matrix rows keep their exact pre-derivation values", () => {
+  assert.deepEqual(CAPABILITY_MATRIX["react-vite"], {
+    defaults: {
+      apiClient: "axios",
+      serverState: "react-query",
+      clientState: "zustand",
+      forms: "react-hook-form-zod",
+      packageManager: "npm",
+    },
+    apiClient: ["axios", "fetch"],
+    serverState: ["react-query", "none"],
+    clientState: ["zustand", "redux", "none"],
+    forms: ["react-hook-form-zod", "none"],
+    packageManager: ["npm", "pnpm", "yarn", "bun"],
+    generators: ["feature", "entity", "widget", "page", "shared"],
+  });
+  assert.deepEqual(CAPABILITY_MATRIX.angular, {
+    defaults: {
+      apiClient: "angular-http",
+      serverState: "angular-query",
+      clientState: "ngrx-signals",
+      forms: "angular-forms-zod",
+      packageManager: "npm",
+    },
+    apiClient: ["angular-http"],
+    serverState: ["angular-query"],
+    clientState: ["ngrx-signals"],
+    forms: ["angular-forms-zod"],
+    packageManager: ["npm"],
+    generators: [],
+  });
 });
 
 test("a complete v2 adapter passes strict validation", () => {

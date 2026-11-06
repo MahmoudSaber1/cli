@@ -6,11 +6,15 @@ All notable changes to `create-fsd-architecture` are documented here.
 
 ### Added
 
+- The capability matrix is now derived from the framework adapters:
+  `bin/core/capability-matrix.mjs` builds every row from the adapter's own
+  `capabilities` and `generators`, so the data lives in exactly one place.
+  The derived matrix is value-identical to the hand-written matrix it
+  replaces. Behaviour is unchanged.
 - Every framework adapter now declares its own `capabilities` and
   `generators`, moved verbatim from the capability matrix (Angular declares
-  an empty generator list, as an inspection-only adapter). The capability
-  matrix remains the runtime source until it is derived from the adapters;
-  a parity test keeps the two copies identical. Behaviour is unchanged.
+  an empty generator list, as an inspection-only adapter). Behaviour is
+  unchanged.
 - Adapter contract v2: `bin/core/frameworks/adapter-contract.mjs` defines the
   `FrameworkAdapter` JSDoc types covering `id`, `family`, `targets`,
   `sourceDirectory`, `capabilities`, `generators`, `dependencies` and

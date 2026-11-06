@@ -106,11 +106,12 @@ migration lands in steps, each keeping behaviour unchanged:
 
 1. This contract (v2 definition, validator, docs).
 2. `capabilities` and `generators` move from the capability matrix into
-   each adapter, verbatim. The matrix remains the runtime source until
-   step 3; a parity test in `tests/adapter-contract.test.mjs` keeps the
-   two copies identical.
-3. The capability matrix is derived from the adapters, ending the
-   duplication.
+   each adapter, verbatim.
+3. The capability matrix is derived from the adapters
+   (`buildCapabilityRow` in `bin/core/capability-matrix.mjs`), ending the
+   duplication: the adapter declarations are the single source of truth,
+   and the package-manager lists stay global — shared by every adapter
+   except inspection-only ones, which carry only the default.
 4. Each adapter declares `targets`, and the registry learns to list
    adapters per target — which is what the Project Target init flow
    (target prompt, framework filtering, `--target` flag) builds on.
