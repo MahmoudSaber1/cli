@@ -137,3 +137,9 @@ the v1 shape is no longer accepted for registered adapters.
    and `tests/adapter-contract.test.mjs` exercises the validator.
 4. Implement the family's generators under `bin/generators/`, or reuse the
    family implementation when the new adapter joins an existing family.
+
+That is the core path. Registering an adapter from a third-party package,
+without a core PR, is proposed in
+[`RFC-PLUGIN-API.md`](RFC-PLUGIN-API.md) (draft — it is also the re-entry
+proposal for the parked plugin system in `PROPOSALS.md`); until the RFC is
+accepted, the steps above are the only route.

@@ -6,6 +6,13 @@ All notable changes to `create-fsd-architecture` are documented here.
 
 ### Added
 
+- RFC: `docs/RFC-PLUGIN-API.md` proposes a public plugin API that lets a
+  third-party package register an adapter (and, for a new family, a family
+  generator) without a core PR — two tiers (data-only adapters, family
+  plugins), explicit opt-in loading, a five-step registration flow built
+  on the contract validator, and a trust/versioning model. It is the
+  re-entry proposal for the parked plugin system in `docs/PROPOSALS.md`.
+  Draft only; nothing is implemented.
 - Generators now sit behind one shared family interface:
   `bin/generators/family-generators.mjs` registers a frozen
   `{ family, createFilePlan }` generator per family, and the generate flow
