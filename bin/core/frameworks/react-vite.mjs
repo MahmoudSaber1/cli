@@ -1,3 +1,4 @@
+/** @type {import("./adapter-contract.mjs").FrameworkAdapter} */
 export const reactViteAdapter = Object.freeze({
   id: "react-vite",
   family: "react",

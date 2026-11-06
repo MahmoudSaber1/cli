@@ -6,6 +6,15 @@ All notable changes to `create-fsd-architecture` are documented here.
 
 ### Added
 
+- Adapter contract v2: `bin/core/frameworks/adapter-contract.mjs` defines the
+  `FrameworkAdapter` JSDoc types covering `id`, `family`, `targets`,
+  `sourceDirectory`, `capabilities`, `generators`, `dependencies` and
+  `dependencyVersions`, exports the allowed vocabularies (`PROJECT_TARGETS`,
+  `CAPABILITY_IDS`, `GENERATOR_TYPES`) and a validator
+  (`validateAdapter` / `assertAdapterContract`) that the test suite runs over
+  every registered adapter. The prose contract is documented in
+  `docs/ADAPTER-CONTRACT.md`. Behaviour is unchanged: the v2 fields are
+  populated by the follow-up adapter migration.
 - `bin/core/package-name.mjs`: `toPackageName()` converts a project name, a
   project path or a scoped package name into a publishable npm package name
   (lowercase, last path segment, spaces to dashes, no leading `.` or `_`, no

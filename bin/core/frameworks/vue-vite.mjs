@@ -1,3 +1,4 @@
+/** @type {import("./adapter-contract.mjs").FrameworkAdapter} */
 export const vueViteAdapter = Object.freeze({
   id: "vue-vite",
   family: "vue",

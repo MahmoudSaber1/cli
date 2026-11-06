@@ -1,3 +1,4 @@
+/** @type {import("./adapter-contract.mjs").FrameworkAdapter} */
 export const nuxtAdapter = Object.freeze({
   id: "nuxt",
   family: "vue",

@@ -1,3 +1,4 @@
+/** @type {import("./adapter-contract.mjs").FrameworkAdapter} */
 export const nextjsAdapter = Object.freeze({
   id: "nextjs",
   family: "react",
