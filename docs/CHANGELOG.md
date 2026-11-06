@@ -6,6 +6,11 @@ All notable changes to `create-fsd-architecture` are documented here.
 
 ### Added
 
+- Every framework adapter now declares its own `capabilities` and
+  `generators`, moved verbatim from the capability matrix (Angular declares
+  an empty generator list, as an inspection-only adapter). The capability
+  matrix remains the runtime source until it is derived from the adapters;
+  a parity test keeps the two copies identical. Behaviour is unchanged.
 - Adapter contract v2: `bin/core/frameworks/adapter-contract.mjs` defines the
   `FrameworkAdapter` JSDoc types covering `id`, `family`, `targets`,
   `sourceDirectory`, `capabilities`, `generators`, `dependencies` and

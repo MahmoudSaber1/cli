@@ -11,12 +11,14 @@
  * `validateAdapter` / `assertAdapterContract` check a candidate adapter
  * against them. The prose contract lives in `docs/ADAPTER-CONTRACT.md`.
  *
- * Contract v2 adds three fields that v1 adapters do not declare yet:
- * `targets`, `capabilities` and `generators`. They are populated by the
- * adapter migration (capabilities and generators move into each adapter,
- * then targets are declared and the registry learns to filter by target),
- * so by default the validator only checks the v2 fields when they are
- * present. Pass `{ requireV2: true }` to enforce the full v2 shape.
+ * Contract v2 adds three fields that v1 adapters did not declare:
+ * `targets`, `capabilities` and `generators`. The capabilities and
+ * generators have since moved into each adapter (they mirror the
+ * capability matrix until the matrix is derived from the adapters);
+ * `targets` is still populated by the targets migration, after which the
+ * registry learns to filter by target. So by default the validator only
+ * checks the v2 fields when they are present. Pass `{ requireV2: true }`
+ * to enforce the full v2 shape.
  */
 
 /** The current adapter contract version. */
@@ -145,8 +147,8 @@ function isNonEmptyString(value) {
   return typeof value === "string" && value.length > 0;
 }
 
-function checkStringList(problems, adapterId, field, values, allowed) {
-  if (!Array.isArray(values) || values.length === 0) {
+function checkStringList(problems, adapterId, field, values, allowed, { allowEmpty = false } = {}) {
+  if (!Array.isArray(values) || (values.length === 0 && !allowEmpty)) {
     problems.push(`adapter "${adapterId}": "${field}" must be a non-empty array`);
     return;
   }
@@ -252,7 +254,11 @@ export function validateAdapter(adapter, { requireV2 = false } = {}) {
       problems.push(`adapter "${adapterId}": "generators" is required by adapter contract v2`);
     }
   } else {
-    checkStringList(problems, adapterId, "generators", adapter.generators, GENERATOR_TYPES);
+    // An empty generator list is valid: it is how an inspection-only
+    // adapter declares that it supports no generators.
+    checkStringList(problems, adapterId, "generators", adapter.generators, GENERATOR_TYPES, {
+      allowEmpty: true,
+    });
   }
 
   if (adapter.baseDependencies !== undefined) {

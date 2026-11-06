@@ -99,20 +99,23 @@ adapter, so a contract violation fails CI like any other regression.
 
 ## From v1 to v2
 
-Contract v1 adapters declare everything except `targets`, `capabilities`
-and `generators`: capabilities and generators still live in the central
-`bin/core/capability-matrix.mjs`, and no adapter declares targets. The
+Contract v1 adapters declared everything except `targets`, `capabilities`
+and `generators`: capabilities and generators lived in the central
+`bin/core/capability-matrix.mjs`, and no adapter declared targets. The
 migration lands in steps, each keeping behaviour unchanged:
 
 1. This contract (v2 definition, validator, docs).
 2. `capabilities` and `generators` move from the capability matrix into
-   each adapter; the matrix is then derived from the adapters instead of
-   duplicating the data.
-3. Each adapter declares `targets`, and the registry learns to list
+   each adapter, verbatim. The matrix remains the runtime source until
+   step 3; a parity test in `tests/adapter-contract.test.mjs` keeps the
+   two copies identical.
+3. The capability matrix is derived from the adapters, ending the
+   duplication.
+4. Each adapter declares `targets`, and the registry learns to list
    adapters per target — which is what the Project Target init flow
    (target prompt, framework filtering, `--target` flag) builds on.
 
-Once step 3 lands, the registry switches to `requireV2: true` and the v1
+Once step 4 lands, the registry switches to `requireV2: true` and the v1
 shape stops being accepted.
 
 ## Adding an adapter

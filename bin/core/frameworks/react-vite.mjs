@@ -6,6 +6,19 @@ export const reactViteAdapter = Object.freeze({
   clientDirective: "",
   publicApiBaseUrlExpression: 'import.meta.env.VITE_API_URL ?? "/api"',
   baseDependencies: ["react-router-dom"],
+  capabilities: {
+    defaults: {
+      apiClient: "axios",
+      serverState: "react-query",
+      clientState: "zustand",
+      forms: "react-hook-form-zod",
+    },
+    apiClient: ["axios", "fetch"],
+    serverState: ["react-query", "none"],
+    clientState: ["zustand", "redux", "none"],
+    forms: ["react-hook-form-zod", "none"],
+  },
+  generators: ["feature", "entity", "widget", "page", "shared"],
   dependencies: {
     apiClient: { axios: ["axios"], fetch: [] },
     serverState: { "react-query": ["@tanstack/react-query"], none: [] },

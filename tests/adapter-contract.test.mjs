@@ -5,6 +5,7 @@ import {
   assertAdapterContract,
   validateAdapter,
 } from "../bin/core/frameworks/adapter-contract.mjs";
+import { CAPABILITY_MATRIX } from "../bin/core/capability-matrix.mjs";
 import { listFrameworkAdapters } from "../bin/core/frameworks/index.mjs";
 
 const completeV2Adapter = Object.freeze({
@@ -51,16 +52,34 @@ test("every registered adapter conforms to the contract today", () => {
   }
 });
 
-test("registered adapters do not declare the v2 fields yet", () => {
-  // The migration populates targets, capabilities and generators on each
-  // adapter; until then strict validation must name exactly those gaps.
+test("registered adapters do not declare targets yet", () => {
+  // Capabilities and generators moved into the adapters with contract v2;
+  // targets are the one v2 field still missing, populated by the targets
+  // migration. Strict validation must name exactly that gap.
   for (const adapter of listFrameworkAdapters()) {
     const problems = validateAdapter(adapter, { requireV2: true });
     assert.deepEqual(
       problems.map((problem) => problem.match(/"(\w+)" is required/)?.[1]),
-      ["targets", "capabilities", "generators"],
+      ["targets"],
       `adapter "${adapter.id}"`
     );
+  }
+});
+
+test("adapter capabilities and generators match the capability matrix", () => {
+  // The data moved verbatim: until the matrix is derived from the adapters,
+  // this parity check keeps the two copies from drifting apart.
+  for (const adapter of listFrameworkAdapters()) {
+    const row = CAPABILITY_MATRIX[adapter.id];
+    assert.ok(row, `capability matrix row for "${adapter.id}"`);
+    const defaults = {};
+    const expected = { defaults };
+    for (const capabilityId of ["apiClient", "serverState", "clientState", "forms"]) {
+      defaults[capabilityId] = row.defaults[capabilityId];
+      expected[capabilityId] = [...row[capabilityId]];
+    }
+    assert.deepEqual(adapter.capabilities, expected, `adapter "${adapter.id}" capabilities`);
+    assert.deepEqual(adapter.generators, [...row.generators], `adapter "${adapter.id}" generators`);
   }
 });
 

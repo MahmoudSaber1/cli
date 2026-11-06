@@ -6,6 +6,19 @@ export const nuxtAdapter = Object.freeze({
   sourceDirectory: "app",
   clientDirective: "",
   baseDependencies: ["vue-router"],
+  capabilities: {
+    defaults: {
+      apiClient: "fetch",
+      serverState: "vue-query",
+      clientState: "pinia",
+      forms: "vee-validate-zod",
+    },
+    apiClient: ["axios", "fetch"],
+    serverState: ["vue-query", "none"],
+    clientState: ["pinia", "none"],
+    forms: ["vee-validate-zod", "none"],
+  },
+  generators: ["feature", "entity", "widget", "page", "shared"],
   dependencies: {
     apiClient: { axios: ["axios"], fetch: [] },
     serverState: { "vue-query": ["@tanstack/vue-query"], none: [] },

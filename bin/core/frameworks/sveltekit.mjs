@@ -6,6 +6,19 @@ export const sveltekitAdapter = Object.freeze({
   sourceDirectory: "src",
   clientDirective: "",
   publicApiBaseUrlExpression: 'env.PUBLIC_API_BASE || "/api"',
+  capabilities: {
+    defaults: {
+      apiClient: "fetch",
+      serverState: "svelte-query",
+      clientState: "svelte-store",
+      forms: "sveltekit-superforms-zod",
+    },
+    apiClient: ["axios", "fetch"],
+    serverState: ["svelte-query", "none"],
+    clientState: ["svelte-store", "none"],
+    forms: ["sveltekit-superforms-zod", "none"],
+  },
+  generators: ["feature", "entity", "widget", "page", "shared"],
   dependencies: {
     apiClient: { axios: ["axios"], fetch: [] },
     serverState: { "svelte-query": ["@tanstack/svelte-query"], none: [] },

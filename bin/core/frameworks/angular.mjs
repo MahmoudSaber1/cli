@@ -7,5 +7,18 @@ export const angularAdapter = Object.freeze({
   sourceDirectory: "src",
   inspectionOnly: true,
   baseDependencies: [],
+  capabilities: {
+    defaults: {
+      apiClient: "angular-http",
+      serverState: "angular-query",
+      clientState: "ngrx-signals",
+      forms: "angular-forms-zod",
+    },
+    apiClient: ["angular-http"],
+    serverState: ["angular-query"],
+    clientState: ["ngrx-signals"],
+    forms: ["angular-forms-zod"],
+  },
+  generators: [],
   dependencies: {},
 });
