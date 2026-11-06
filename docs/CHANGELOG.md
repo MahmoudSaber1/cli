@@ -6,6 +6,12 @@ All notable changes to `create-fsd-architecture` are documented here.
 
 ### Added
 
+- The create flow now asks for a **project target** (Web, Multi-web,
+  Mobile, Universal) between the project name and the framework. The
+  selection is flow state in the new `bin/core/project-target.mjs` — it
+  maps to adapter targets for the steps that follow and is shown in the
+  dry-run plan — and non-interactive runs keep behaving exactly as
+  before: `--yes` never asks and defaults to Web.
 - RFC: `docs/RFC-PLUGIN-API.md` proposes a public plugin API that lets a
   third-party package register an adapter (and, for a new family, a family
   generator) without a core PR — two tiers (data-only adapters, family

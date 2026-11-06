@@ -20,6 +20,11 @@ import {
   resolveExplicitPackageName,
 } from "../core/package-name.mjs";
 import {
+  DEFAULT_PROJECT_TARGET,
+  PROJECT_TARGET_OPTIONS,
+  getProjectTargetOption,
+} from "../core/project-target.mjs";
+import {
   getAvailableTemplate,
   getTemplate,
   listTemplates,
@@ -128,10 +133,11 @@ function showNextSteps(projectName, depsInstalled, packageManager) {
   console.log();
 }
 
-function showProjectPlan({ projectName, targetDir, template, projectConfig, options }) {
+function showProjectPlan({ projectName, targetDir, target, template, projectConfig, options }) {
   const replace = fs.existsSync(targetDir) && options.force;
   console.log(chalk.bold("  Project plan (dry run)\n"));
   console.log(`  Target: ${targetDir}`);
+  console.log(`  Project target: ${getProjectTargetOption(target).title} (${target})`);
   console.log(`  Template: ${template.title} (${template.repo}#${template.ref})`);
   console.log(`  Package manager: ${projectConfig.packageManager}`);
   console.log(`  API client: ${projectConfig.apiClient}`);
@@ -208,6 +214,48 @@ export async function resolvePackageName(projectName, options = {}, ask = prompt
   };
 }
 
+/**
+ * Resolves the project target for the create flow.
+ *
+ * The target step sits between the project name and the framework: the
+ * chosen target decides what the rest of the flow can offer (the tool
+ * step for multi-app targets, and framework filtering once it lands).
+ *
+ * An explicit `options.target` wins and is validated. `--yes` never asks
+ * and defaults to "web", so existing non-interactive commands behave
+ * exactly as before. The selection is flow state only — persisting it
+ * into the project config is separate follow-up work.
+ *
+ * @param {{yes?: boolean, target?: string}} options
+ * @param {Function} ask the prompt implementation, injectable for the tests
+ * @returns {Promise<string>} the project target selection
+ */
+export async function resolveProjectTarget(options = {}, ask = prompts) {
+  if (options.target !== undefined) {
+    return getProjectTargetOption(options.target).value;
+  }
+
+  if (options.yes) return DEFAULT_PROJECT_TARGET;
+
+  const answer = await ask(
+    {
+      type: "select",
+      name: "target",
+      message: "Project target",
+      choices: PROJECT_TARGET_OPTIONS.map(({ title, value, description }) => ({
+        title,
+        value,
+        description,
+      })),
+      initial: PROJECT_TARGET_OPTIONS.findIndex(
+        ({ value }) => value === DEFAULT_PROJECT_TARGET
+      ),
+    },
+    onCancel
+  );
+  return answer.target;
+}
+
 export async function runCreateProject(options) {
   showBanner();
   const projectName = await selectProjectName(options.projectName);
@@ -224,6 +272,8 @@ export async function runCreateProject(options) {
   // the name the user typed, the package name is the npm-safe version of it.
   const { packageName, warning } = await resolvePackageName(projectName, options);
   if (warning) console.log(chalk.yellow(`  ${warning}`));
+
+  const target = await resolveProjectTarget(options);
 
   const template = await selectTemplate(options.framework);
 
@@ -245,7 +295,7 @@ export async function runCreateProject(options) {
       });
 
   if (options.dryRun) {
-    showProjectPlan({ projectName, targetDir, template, projectConfig, options });
+    showProjectPlan({ projectName, targetDir, target, template, projectConfig, options });
     return;
   }
 
