@@ -6,6 +6,11 @@ All notable changes to `create-fsd-architecture` are documented here.
 
 ### Added
 
+- Adapters declare the project targets they can create — every current
+  adapter declares `targets: ["web"]` — and the registry can list adapters
+  per target (`listFrameworkAdaptersByTarget`). Registration now enforces
+  adapter contract v2 in full, so a registered adapter missing any v2
+  field fails at startup with every violation listed.
 - The capability matrix is now derived from the framework adapters:
   `bin/core/capability-matrix.mjs` builds every row from the adapter's own
   `capabilities` and `generators`, so the data lives in exactly one place.

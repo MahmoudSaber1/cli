@@ -113,11 +113,13 @@ migration lands in steps, each keeping behaviour unchanged:
    and the package-manager lists stay global — shared by every adapter
    except inspection-only ones, which carry only the default.
 4. Each adapter declares `targets`, and the registry learns to list
-   adapters per target — which is what the Project Target init flow
-   (target prompt, framework filtering, `--target` flag) builds on.
+   adapters per target (`listFrameworkAdaptersByTarget`) — which is what
+   the Project Target init flow (target prompt, framework filtering,
+   `--target` flag) builds on.
 
-Once step 4 lands, the registry switches to `requireV2: true` and the v1
-shape stops being accepted.
+All four steps have landed: the registry now enforces the full v2 shape
+at registration time (`assertAdapterContract` with `requireV2: true`), so
+the v1 shape is no longer accepted for registered adapters.
 
 ## Adding an adapter
 
@@ -126,7 +128,7 @@ shape stops being accepted.
 2. Register it in `bin/core/frameworks/index.mjs` and add the framework to
    the template registry (`bin/core/template-registry.mjs`).
 3. Declare the full v2 shape, including `targets`, `capabilities` and
-   `generators`; `tests/adapter-contract.test.mjs` will validate it in
-   strict mode once the registry enforces v2.
+   `generators`; the registry validates it strictly at registration time,
+   and `tests/adapter-contract.test.mjs` exercises the validator.
 4. Implement the family's generators under `bin/generators/`, or reuse the
    family implementation when the new adapter joins an existing family.

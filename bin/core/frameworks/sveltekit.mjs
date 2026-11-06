@@ -2,6 +2,7 @@
 export const sveltekitAdapter = Object.freeze({
   id: "sveltekit",
   family: "svelte",
+  targets: ["web"],
   runtime: "sveltekit",
   sourceDirectory: "src",
   clientDirective: "",

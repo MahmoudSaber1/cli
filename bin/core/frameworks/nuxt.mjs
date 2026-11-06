@@ -2,6 +2,7 @@
 export const nuxtAdapter = Object.freeze({
   id: "nuxt",
   family: "vue",
+  targets: ["web"],
   runtime: "nuxt",
   sourceDirectory: "app",
   clientDirective: "",

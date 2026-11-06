@@ -2,6 +2,7 @@
 export const nextjsAdapter = Object.freeze({
   id: "nextjs",
   family: "react",
+  targets: ["web"],
   sourceDirectory: "src",
   clientDirective: '"use client";\n\n',
   publicApiBaseUrlExpression: 'process.env.NEXT_PUBLIC_API_URL ?? "/api"',

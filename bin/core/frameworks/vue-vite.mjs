@@ -2,6 +2,7 @@
 export const vueViteAdapter = Object.freeze({
   id: "vue-vite",
   family: "vue",
+  targets: ["web"],
   sourceDirectory: "src",
   clientDirective: "",
   publicApiBaseUrlExpression: 'import.meta.env.VITE_API_URL ?? "/api"',

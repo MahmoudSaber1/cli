@@ -12,13 +12,13 @@
  * against them. The prose contract lives in `docs/ADAPTER-CONTRACT.md`.
  *
  * Contract v2 adds three fields that v1 adapters did not declare:
- * `targets`, `capabilities` and `generators`. The capabilities and
- * generators have since moved into each adapter, and the capability
- * matrix is derived from them; `targets` is still populated by the
- * targets migration, after which the registry learns to filter by
- * target. So by default the validator only checks the v2 fields when
- * they are present. Pass `{ requireV2: true }` to enforce the full v2
- * shape.
+ * `targets`, `capabilities` and `generators`. All three are now populated
+ * on every registered adapter — capabilities and generators moved in from
+ * the capability matrix (which is derived from the adapters), and each
+ * adapter declares its targets — and the registry enforces the full v2
+ * shape at registration time via `assertAdapterContract` with
+ * `{ requireV2: true }`. The lenient default mode remains for checking
+ * candidate adapters that are not registered yet.
  */
 
 /** The current adapter contract version. */
@@ -108,18 +108,17 @@ export const GENERATOR_TYPES = Object.freeze([
  *   Matches the template registry value and the capability matrix key.
  * @property {AdapterFamily} family - Framework family ("react", "vue",
  *   "svelte", "angular", ...). Generators are selected per family.
- * @property {ProjectTarget[]} [targets] - Project targets the adapter can
- *   create. Required by contract v2; populated by the targets migration,
- *   after which the registry can list adapters per target.
+ * @property {ProjectTarget[]} targets - Project targets the adapter can
+ *   create. The registry can list adapters per target; the init flow asks
+ *   for a target before it offers frameworks.
  * @property {string} sourceDirectory - Directory that holds the FSD source
  *   tree inside a generated project ("src" for most frameworks, "app" for
  *   Nuxt).
- * @property {AdapterCapabilities} [capabilities] - Capability options and
- *   defaults offered by this adapter. Required by contract v2; populated
- *   when the capability matrix moves into the adapters.
- * @property {GeneratorType[]} [generators] - Generator types this adapter
- *   supports. Required by contract v2; populated together with
- *   `capabilities`.
+ * @property {AdapterCapabilities} capabilities - Capability options and
+ *   defaults offered by this adapter; the capability matrix is derived
+ *   from these declarations.
+ * @property {GeneratorType[]} generators - Generator types this adapter
+ *   supports; empty for inspection-only adapters.
  * @property {AdapterDependencies} dependencies - npm packages per
  *   capability option. May be empty only for inspection-only adapters.
  * @property {Record<string, string>} [dependencyVersions] - Exact version

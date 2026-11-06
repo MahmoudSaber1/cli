@@ -4,7 +4,11 @@ import { nuxtAdapter } from "./nuxt.mjs";
 import { reactViteAdapter } from "./react-vite.mjs";
 import { sveltekitAdapter } from "./sveltekit.mjs";
 import { vueViteAdapter } from "./vue-vite.mjs";
+import { PROJECT_TARGETS, assertAdapterContract } from "./adapter-contract.mjs";
 
+// Registration enforces adapter contract v2 in full: an adapter that does
+// not declare every v2 field (targets, capabilities, generators, ...) fails
+// here, at startup, with every violation listed.
 const adapters = new Map(
   [
     reactViteAdapter,
@@ -13,7 +17,7 @@ const adapters = new Map(
     nuxtAdapter,
     sveltekitAdapter,
     angularAdapter,
-  ].map((adapter) => [adapter.id, adapter])
+  ].map((adapter) => [adapter.id, assertAdapterContract(adapter, { requireV2: true })])
 );
 
 /**
@@ -43,6 +47,23 @@ export function hasFrameworkAdapter(framework) {
  */
 export function listFrameworkAdapters() {
   return [...adapters.values()];
+}
+
+/**
+ * Lists the adapters that can create projects for a target, in registry
+ * order. The Project Target init flow uses this to offer only the
+ * frameworks that support the chosen target.
+ *
+ * @param {import("./adapter-contract.mjs").ProjectTarget} target - The project target.
+ * @returns {import("./adapter-contract.mjs").FrameworkAdapter[]} Adapters supporting the target.
+ */
+export function listFrameworkAdaptersByTarget(target) {
+  if (!PROJECT_TARGETS.includes(target)) {
+    throw new Error(
+      `Unknown project target "${target}". Supported targets: ${PROJECT_TARGETS.join(", ")}.`
+    );
+  }
+  return listFrameworkAdapters().filter((adapter) => adapter.targets.includes(target));
 }
 
 /**

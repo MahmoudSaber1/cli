@@ -3,6 +3,7 @@
 export const angularAdapter = Object.freeze({
   id: "angular",
   family: "angular",
+  targets: ["web"],
   runtime: "angular",
   sourceDirectory: "src",
   inspectionOnly: true,

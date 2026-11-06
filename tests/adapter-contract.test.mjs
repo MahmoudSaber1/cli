@@ -6,7 +6,10 @@ import {
   validateAdapter,
 } from "../bin/core/frameworks/adapter-contract.mjs";
 import { CAPABILITY_MATRIX } from "../bin/core/capability-matrix.mjs";
-import { listFrameworkAdapters } from "../bin/core/frameworks/index.mjs";
+import {
+  listFrameworkAdapters,
+  listFrameworkAdaptersByTarget,
+} from "../bin/core/frameworks/index.mjs";
 
 const completeV2Adapter = Object.freeze({
   id: "example",
@@ -52,18 +55,25 @@ test("every registered adapter conforms to the contract today", () => {
   }
 });
 
-test("registered adapters do not declare targets yet", () => {
-  // Capabilities and generators moved into the adapters with contract v2;
-  // targets are the one v2 field still missing, populated by the targets
-  // migration. Strict validation must name exactly that gap.
+test("every registered adapter satisfies the full v2 contract", () => {
+  // With targets declared, no v2 field is missing anymore: strict
+  // validation passes for every adapter, and the registry enforces it at
+  // registration time.
   for (const adapter of listFrameworkAdapters()) {
-    const problems = validateAdapter(adapter, { requireV2: true });
-    assert.deepEqual(
-      problems.map((problem) => problem.match(/"(\w+)" is required/)?.[1]),
-      ["targets"],
-      `adapter "${adapter.id}"`
-    );
+    assert.deepEqual(validateAdapter(adapter, { requireV2: true }), [], `adapter "${adapter.id}"`);
+    assert.deepEqual(adapter.targets, ["web"], `adapter "${adapter.id}" targets`);
   }
+});
+
+test("registry lists adapters per target", () => {
+  assert.deepEqual(
+    listFrameworkAdaptersByTarget("web").map((adapter) => adapter.id),
+    listFrameworkAdapters().map((adapter) => adapter.id)
+  );
+  // No adapter creates mobile projects yet; the first one arrives with the
+  // mobile adapter work, not by loosening this filter.
+  assert.deepEqual(listFrameworkAdaptersByTarget("mobile"), []);
+  assert.throws(() => listFrameworkAdaptersByTarget("desktop"), /Unknown project target "desktop"/);
 });
 
 test("capability matrix is derived from the adapters", () => {
