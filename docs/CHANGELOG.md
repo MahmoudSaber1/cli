@@ -14,6 +14,11 @@ All notable changes to `create-fsd-architecture` are documented here.
   yet (multi-web, mobile, universal) are rejected with a clear message
   until their support lands, `--help` and the README mark them as not
   yet available, and the README flag table lists all three flags.
+- Non-interactive behaviour is pinned by regression tests: `--yes
+  --framework` commands resolve the project target to Web, never prompt,
+  and plan exactly as before, while unimplemented targets are rejected
+  in non-interactive runs too instead of being silently downgraded to a
+  web project.
 - The framework step of the create flow is now filtered by the chosen
   project target: `listTemplatesForTarget` in the template registry keeps
   only templates whose adapter serves the target, an explicit framework

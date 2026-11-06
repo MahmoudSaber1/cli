@@ -114,6 +114,15 @@ test("--yes defaults to web without asking", async () => {
   assert.equal(ask.calls.length, 0);
 });
 
+test("--yes with a framework (the legacy automation shape) still resolves to web", async () => {
+  const ask = fakeAsk({});
+  assert.equal(
+    await resolveProjectTarget({ yes: true, framework: "react-vite" }, ask),
+    "web"
+  );
+  assert.equal(ask.calls.length, 0);
+});
+
 test("the prompt offers the four targets with web preselected and the rest disabled", async () => {
   const ask = fakeAsk({ target: "web" });
   assert.equal(await resolveProjectTarget({}, ask), "web");
