@@ -52,6 +52,9 @@ Commands:
 
 Create options:
   -f, --framework <id>          Select a framework without the template prompt
+      --target <target>         Project target: web, multi-web, mobile, or universal
+      --monorepo                Shortcut for --target multi-web
+      --mobile                  Shortcut for --target mobile
   -y, --yes                     Accept defaults (requires name and --framework)
       --package-manager <id>    Select npm, pnpm, yarn, or bun
       --package-name <name>     Set the npm package name independently of the folder name
