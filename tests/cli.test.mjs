@@ -80,21 +80,32 @@ test("CLI parser supports automation-friendly create flags", () => {
 });
 
 test("CLI parser resolves the project target flags", () => {
-  assert.equal(parseCliArgs(["shop", "--target", "mobile"]).target, "mobile");
-  assert.equal(parseCliArgs(["shop", "--target=universal"]).target, "universal");
+  assert.equal(parseCliArgs(["shop", "--target", "web"]).target, "web");
+  assert.equal(parseCliArgs(["shop", "--target=web"]).target, "web");
   assert.equal(parseCliArgs(["shop"]).target, undefined);
+});
 
-  const monorepo = parseCliArgs(["shop", "--monorepo"]);
-  assert.equal(monorepo.target, "multi-web");
-  assert.equal(monorepo.monorepo, true);
-
-  const mobile = parseCliArgs(["shop", "--mobile"]);
-  assert.equal(mobile.target, "mobile");
-  assert.equal(mobile.mobile, true);
-
-  // Spellings that agree on one target may be combined.
-  assert.equal(parseCliArgs(["shop", "--target", "mobile", "--mobile"]).target, "mobile");
-  assert.equal(parseCliArgs(["shop", "--target", "multi-web", "--monorepo"]).target, "multi-web");
+test("CLI parser rejects targets that are not available yet", () => {
+  // Multi-web, mobile and universal are valid selections whose support
+  // has not landed: every spelling of them fails fast, with the reason,
+  // instead of creating a web project under a different name.
+  assert.throws(
+    () => parseCliArgs(["shop", "--monorepo"]),
+    /The Multi-web project target is not available yet/
+  );
+  assert.throws(
+    () => parseCliArgs(["shop", "--mobile"]),
+    /The Mobile project target is not available yet/
+  );
+  assert.throws(
+    () => parseCliArgs(["shop", "--target", "universal"]),
+    /The Universal project target is not available yet/
+  );
+  assert.throws(() => parseCliArgs(["shop", "--target", "mobile", "--mobile"]), CliUsageError);
+  assert.throws(
+    () => parseCliArgs(["shop", "--target", "multi-web", "--monorepo"]),
+    CliUsageError
+  );
 });
 
 test("CLI parser rejects invalid or conflicting target flags", () => {

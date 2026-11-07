@@ -8,7 +8,9 @@ import { fileURLToPath } from "node:url";
 
 // Regression net for the project-target work: commands that automated the
 // CLI before targets existed must behave exactly as before, with the
-// project target resolved to Web under --yes and never prompted for.
+// project target resolved to Web under --yes and never prompted for —
+// and targets whose support has not landed must be refused outright
+// instead of silently creating a web project.
 
 const root = fileURLToPath(new URL("..", import.meta.url));
 const entry = path.join(root, "bin/index.mjs");
@@ -30,7 +32,7 @@ test("the legacy --yes --framework command plans a Web project, unchanged", (t) 
   assert.equal(fs.existsSync(path.join(result.cwd, "app")), false);
 });
 
-test("--monorepo resolves the target in non-interactive runs too", (t) => {
+test("--monorepo is rejected until monorepo support lands", (t) => {
   const result = runCli(t, [
     "app",
     "--framework",
@@ -40,11 +42,12 @@ test("--monorepo resolves the target in non-interactive runs too", (t) => {
     "--dry-run",
   ]);
 
-  assert.equal(result.status, 0, result.output);
-  assert.match(result.output, /Project target: Multi-web \(multi-web\)/);
+  assert.notEqual(result.status, 0, result.output);
+  assert.match(result.output, /The Multi-web project target is not available yet/);
+  assert.equal(fs.existsSync(path.join(result.cwd, "app")), false);
 });
 
-test("--yes never overrides an explicit target it cannot serve", (t) => {
+test("--yes never lets an unimplemented target through", (t) => {
   const result = runCli(t, [
     "app",
     "--framework",
@@ -56,6 +59,6 @@ test("--yes never overrides an explicit target it cannot serve", (t) => {
   ]);
 
   assert.notEqual(result.status, 0, result.output);
-  assert.match(result.output, /React \+ Vite does not support the Mobile target\./);
+  assert.match(result.output, /The Mobile project target is not available yet/);
   assert.equal(fs.existsSync(path.join(result.cwd, "app")), false);
 });

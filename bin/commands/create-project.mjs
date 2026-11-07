@@ -22,6 +22,7 @@ import {
 import {
   DEFAULT_PROJECT_TARGET,
   PROJECT_TARGET_OPTIONS,
+  assertProjectTargetAvailable,
   getProjectTargetOption,
 } from "../core/project-target.mjs";
 import {
@@ -245,7 +246,9 @@ export async function resolvePackageName(projectName, options = {}, ask = prompt
  */
 export async function resolveProjectTarget(options = {}, ask = prompts) {
   if (options.target !== undefined) {
-    return getProjectTargetOption(options.target).value;
+    const selection = getProjectTargetOption(options.target).value;
+    assertProjectTargetAvailable(selection);
+    return selection;
   }
 
   if (options.yes) return DEFAULT_PROJECT_TARGET;
@@ -255,10 +258,11 @@ export async function resolveProjectTarget(options = {}, ask = prompts) {
       type: "select",
       name: "target",
       message: "Project target",
-      choices: PROJECT_TARGET_OPTIONS.map(({ title, value, description }) => ({
-        title,
-        value,
-        description,
+      choices: PROJECT_TARGET_OPTIONS.map((option) => ({
+        title: option.available ? option.title : `${option.title} (Coming Soon)`,
+        value: option.value,
+        description: option.description,
+        disabled: !option.available,
       })),
       initial: PROJECT_TARGET_OPTIONS.findIndex(
         ({ value }) => value === DEFAULT_PROJECT_TARGET
@@ -266,6 +270,7 @@ export async function resolveProjectTarget(options = {}, ask = prompts) {
     },
     onCancel
   );
+  assertProjectTargetAvailable(answer.target);
   return answer.target;
 }
 

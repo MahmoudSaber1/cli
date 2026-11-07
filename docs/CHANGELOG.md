@@ -10,11 +10,15 @@ All notable changes to `create-fsd-architecture` are documented here.
   plus the `--monorepo` (multi-web) and `--mobile` shorthands. Invalid
   values and conflicting spellings fail with a usage error, an agreed
   shorthand resolves into the same `target` option the prompt step uses,
-  and the flags are listed in `--help`.
+  and the flags are listed in `--help`. Targets that are not implemented
+  yet (multi-web, mobile, universal) are rejected with a clear message
+  until their support lands, `--help` and the README mark them as not
+  yet available, and the README flag table lists all three flags.
 - Non-interactive behaviour is pinned by regression tests: `--yes
   --framework` commands resolve the project target to Web, never prompt,
-  and plan exactly as before, while an explicit target is never
-  overridden by `--yes`.
+  and plan exactly as before, while unimplemented targets are rejected
+  in non-interactive runs too instead of being silently downgraded to a
+  web project.
 - The framework step of the create flow is now filtered by the chosen
   project target: `listTemplatesForTarget` in the template registry keeps
   only templates whose adapter serves the target, an explicit framework
@@ -25,7 +29,10 @@ All notable changes to `create-fsd-architecture` are documented here.
   selection is flow state in the new `bin/core/project-target.mjs` — it
   maps to adapter targets for the steps that follow and is shown in the
   dry-run plan — and non-interactive runs keep behaving exactly as
-  before: `--yes` never asks and defaults to Web.
+  before: `--yes` never asks and defaults to Web. Only Web is implemented
+  today: the other targets appear in the prompt as disabled "Coming
+  Soon" choices, and selecting one programmatically is rejected with a
+  clear message instead of silently creating a web project.
 - RFC: `docs/RFC-PLUGIN-API.md` proposes a public plugin API that lets a
   third-party package register an adapter (and, for a new family, a family
   generator) without a core PR — two tiers (data-only adapters, family

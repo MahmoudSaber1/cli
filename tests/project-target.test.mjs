@@ -5,8 +5,11 @@ import {
   DEFAULT_PROJECT_TARGET,
   PROJECT_TARGET_OPTIONS,
   adapterTargetsForSelection,
+  assertProjectTargetAvailable,
   getProjectTargetOption,
+  isProjectTargetAvailable,
   isProjectTargetSelection,
+  projectTargetUnavailableMessage,
 } from "../bin/core/project-target.mjs";
 import { resolveProjectTarget, selectTemplate } from "../bin/commands/create-project.mjs";
 import { listTemplatesForTarget } from "../bin/core/template-registry.mjs";
@@ -65,7 +68,7 @@ test("selections map to adapter targets inside the contract vocabulary", () => {
 
 test("an explicit target wins and is validated without asking", async () => {
   const ask = fakeAsk({});
-  assert.equal(await resolveProjectTarget({ target: "mobile" }, ask), "mobile");
+  assert.equal(await resolveProjectTarget({ target: "web" }, ask), "web");
   assert.equal(ask.calls.length, 0);
 
   await assert.rejects(
@@ -73,6 +76,36 @@ test("an explicit target wins and is validated without asking", async () => {
     /Unknown project target "desktop"/
   );
   assert.equal(ask.calls.length, 0);
+});
+
+test("a target that is not implemented yet is rejected, never silently downgraded", async () => {
+  const ask = fakeAsk({});
+  for (const target of ["multi-web", "mobile", "universal"]) {
+    await assert.rejects(
+      () => resolveProjectTarget({ target }, ask),
+      /project target is not available yet/
+    );
+  }
+  // The guard applies under --yes too: an explicit target beats the
+  // default, so a gated one fails instead of falling back to web.
+  await assert.rejects(
+    () => resolveProjectTarget({ yes: true, target: "mobile" }, ask),
+    /The Mobile project target is not available yet: no framework supports mobile yet\./
+  );
+  assert.equal(ask.calls.length, 0);
+});
+
+test("only the web target is available today", () => {
+  assert.equal(isProjectTargetAvailable("web"), true);
+  for (const target of ["multi-web", "mobile", "universal"]) {
+    assert.equal(isProjectTargetAvailable(target), false);
+    assert.match(
+      projectTargetUnavailableMessage(target),
+      /is not available yet: .+\. Only Web projects can be created today\./
+    );
+    assert.throws(() => assertProjectTargetAvailable(target), /not available yet/);
+  }
+  assert.doesNotThrow(() => assertProjectTargetAvailable("web"));
 });
 
 test("--yes defaults to web without asking", async () => {
@@ -90,18 +123,9 @@ test("--yes with a framework (the legacy automation shape) still resolves to web
   assert.equal(ask.calls.length, 0);
 });
 
-test("an explicit target beats the --yes default", async () => {
-  const ask = fakeAsk({});
-  assert.equal(
-    await resolveProjectTarget({ yes: true, target: "universal" }, ask),
-    "universal"
-  );
-  assert.equal(ask.calls.length, 0);
-});
-
-test("the prompt offers the four targets with web preselected", async () => {
-  const ask = fakeAsk({ target: "universal" });
-  assert.equal(await resolveProjectTarget({}, ask), "universal");
+test("the prompt offers the four targets with web preselected and the rest disabled", async () => {
+  const ask = fakeAsk({ target: "web" });
+  assert.equal(await resolveProjectTarget({}, ask), "web");
 
   assert.equal(ask.calls.length, 1);
   const [question] = ask.calls;
@@ -112,6 +136,16 @@ test("the prompt offers the four targets with web preselected", async () => {
     ["web", "multi-web", "mobile", "universal"]
   );
   assert.equal(question.choices[question.initial].value, "web");
+  // Unimplemented targets are visible but cannot be picked, mirroring how
+  // the framework prompt treats planned templates.
+  assert.deepEqual(
+    question.choices.map((choice) => choice.disabled),
+    [false, true, true, true]
+  );
+  assert.deepEqual(
+    question.choices.map((choice) => choice.title),
+    ["Web", "Multi-web (Coming Soon)", "Mobile (Coming Soon)", "Universal (Coming Soon)"]
+  );
 });
 
 const WEB_TEMPLATES = ["react-vite", "nextjs", "vue-vite", "nuxt", "sveltekit"];
