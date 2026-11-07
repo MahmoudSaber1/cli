@@ -17,6 +17,15 @@
  * The selection is flow state for now: persisting it into the project
  * config is separate follow-up work, and the `--target` flag arrives with
  * the CLI flags work. Nothing here writes to disk.
+ *
+ * Only the web target is implemented today. The other selections are
+ * roadmap items (multi-app workspaces, mobile support), so they carry
+ * `available: false` plus the reason: the prompt offers them as disabled
+ * "Coming Soon" choices — the same treatment planned templates get — and
+ * every programmatic entry point rejects them through
+ * `assertProjectTargetAvailable` instead of silently creating a plain
+ * web project. When a target's support lands, flipping its `available`
+ * flag is the only change needed here.
  */
 
 /**
@@ -39,24 +48,32 @@ export const PROJECT_TARGET_OPTIONS = Object.freeze([
     title: "Web",
     description: "A single web application",
     adapterTargets: Object.freeze(["web"]),
+    available: true,
   }),
   Object.freeze({
     value: "multi-web",
     title: "Multi-web",
     description: "Several web applications in one workspace",
     adapterTargets: Object.freeze(["web"]),
+    available: false,
+    unavailableReason: "monorepo workspaces are not supported yet",
   }),
   Object.freeze({
     value: "mobile",
     title: "Mobile",
     description: "A mobile application",
     adapterTargets: Object.freeze(["mobile"]),
+    available: false,
+    unavailableReason: "no framework supports mobile yet",
   }),
   Object.freeze({
     value: "universal",
     title: "Universal",
     description: "Web and mobile applications in one workspace",
     adapterTargets: Object.freeze(["web", "mobile"]),
+    available: false,
+    unavailableReason:
+      "no framework supports mobile yet, so its mobile half cannot be created",
   }),
 ]);
 
@@ -97,4 +114,35 @@ export function getProjectTargetOption(selection) {
  */
 export function adapterTargetsForSelection(selection) {
   return [...getProjectTargetOption(selection).adapterTargets];
+}
+
+/**
+ * @param {string} selection - A project target selection.
+ * @returns {boolean} Whether projects with this target can be created today.
+ */
+export function isProjectTargetAvailable(selection) {
+  return getProjectTargetOption(selection).available;
+}
+
+/**
+ * Explains why a project target cannot be selected yet.
+ *
+ * @param {ProjectTargetSelection} selection - An unavailable selection.
+ * @returns {string} The user-facing explanation.
+ */
+export function projectTargetUnavailableMessage(selection) {
+  const option = getProjectTargetOption(selection);
+  return `The ${option.title} project target is not available yet: ${option.unavailableReason}. Only Web projects can be created today.`;
+}
+
+/**
+ * Rejects a selection whose target is not implemented yet, so no entry
+ * point (prompt, flags, or a direct call) can proceed with it.
+ *
+ * @param {ProjectTargetSelection} selection - A project target selection.
+ */
+export function assertProjectTargetAvailable(selection) {
+  if (!isProjectTargetAvailable(selection)) {
+    throw new Error(projectTargetUnavailableMessage(selection));
+  }
 }

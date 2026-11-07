@@ -1,6 +1,8 @@
 import {
   PROJECT_TARGET_OPTIONS,
+  isProjectTargetAvailable,
   isProjectTargetSelection,
+  projectTargetUnavailableMessage,
 } from "../core/project-target.mjs";
 
 const BOOLEAN_FLAGS = new Map([
@@ -239,6 +241,13 @@ export function parseCliArgs(rawArgs) {
       );
     }
     options.target = shorthand.target;
+  }
+
+  // Targets whose support has not landed yet are refused here, at the
+  // CLI boundary, instead of failing later or silently creating a web
+  // project: today only web can be created.
+  if (options.target !== undefined && !isProjectTargetAvailable(options.target)) {
+    throw new CliUsageError(projectTargetUnavailableMessage(options.target));
   }
 
   if (options.yes && !options.projectName) {
