@@ -141,6 +141,9 @@ Create options:
 | Option | Purpose |
 | --- | --- |
 | `-f, --framework <id>` | Skip the framework prompt |
+| `--target <target>` | Select the project target: `web` (the only target available today; `multi-web`, `mobile` and `universal` are rejected until their support lands) |
+| `--monorepo` | Shortcut for `--target multi-web` (not yet available) |
+| `--mobile` | Shortcut for `--target mobile` (not yet available) |
 | `-y, --yes` | Accept framework defaults without prompts; requires a project name and `--framework` |
 | `--package-manager <id>` | Select npm, pnpm, Yarn, or Bun non-interactively |
 | `--package-name <name>` | Set the npm package name independently of the folder name; the name must be publishable on npm |
