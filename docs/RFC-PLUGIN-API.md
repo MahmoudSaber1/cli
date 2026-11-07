@@ -26,6 +26,12 @@ owner"; this RFC supplies the last three and asks the maintainers to
 approve the use case below. **Nothing here is implemented.** Until the RFC
 is accepted, the core-PR path remains the only way to add an adapter.
 
+**What merging this document means:** merging records the proposal in the
+repository so it can be referenced and revised. It is *not* approval of
+the plugin API. Approval is a separate maintainer decision, recorded by
+moving the plugin-system row in `docs/PROPOSALS.md` out of the Parking
+Lot; until that decision is made, this RFC remains a draft.
+
 ## Use case
 
 - **Community frameworks.** Framework support requests already arrive as
@@ -198,8 +204,10 @@ release without notice.
 
 ### 8. Maintenance owner
 
-- Core maintainers own the public API surface, the validator and the
-  registration flow — the boundary, not the plugins.
+- **Mahmoud Saber** — author of the adapter contract and of this RFC —
+  is the maintenance owner for the public API surface, the validator and
+  the registration flow: the boundary, not the plugins. Changes to that
+  boundary require the project owner's approval (Ashraf Mohamed).
 - Plugin authors own their adapters, templates and generators, including
   keeping `dependencyVersions` current. A plugin that validates but
   generates a broken project is the author's bug, not a core bug.
