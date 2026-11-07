@@ -11,7 +11,10 @@ All notable changes to `create-fsd-architecture` are documented here.
   selection is flow state in the new `bin/core/project-target.mjs` — it
   maps to adapter targets for the steps that follow and is shown in the
   dry-run plan — and non-interactive runs keep behaving exactly as
-  before: `--yes` never asks and defaults to Web.
+  before: `--yes` never asks and defaults to Web. Only Web is implemented
+  today: the other targets appear in the prompt as disabled "Coming
+  Soon" choices, and selecting one programmatically is rejected with a
+  clear message instead of silently creating a web project.
 - RFC: `docs/RFC-PLUGIN-API.md` proposes a public plugin API that lets a
   third-party package register an adapter (and, for a new family, a family
   generator) without a core PR — two tiers (data-only adapters, family
